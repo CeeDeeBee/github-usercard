@@ -4,8 +4,6 @@
 */
 
 const cardsDiv = document.querySelector('.cards');
-// cardsDiv.append(createUserCard(userData));
-// followersArray.forEach(follower => cardsDiv.append(createUserCard(follower)));
 
 const config = {
   auth: {
@@ -18,6 +16,7 @@ const config = {
 axios.get('https://api.github.com/users/ceedeebee', config)
   // Handle user data
   .then(response => {
+    // Create and append user card
     cardsDiv.append(createUserCard(response.data));
     // Get followers
     axios.get(response.data.followers_url, config)
@@ -26,6 +25,7 @@ axios.get('https://api.github.com/users/ceedeebee', config)
         // Get data for each follower
         followersResponse.data.forEach(follower => {
           axios.get(follower.url, config)
+            // Create and append follower cards
             .then(followerResponse => cardsDiv.append(createUserCard(followerResponse.data)))
             .catch(err => console.log(`Follower Get Error: ${err}`));
         })
@@ -78,6 +78,7 @@ function createUserCard(obj) {
   console.log(obj);
   // Create elements
   const card = document.createElement('div'),
+    topContainer = document.createElement('div'),
     img = document.createElement('img'),
     cardInfo = document.createElement('div'),
     name = document.createElement('h3'),
@@ -87,10 +88,12 @@ function createUserCard(obj) {
     profileLink = document.createElement('a'),
     followers = document.createElement('p'),
     following = document.createElement('p'),
-    bio = document.createElement('p');
+    bio = document.createElement('p'),
+    calendar = document.createElement('div');
 
   // Add classes
   card.classList.add('card');
+  topContainer.classList.add('top-container');
   cardInfo.classList.add('card-info');
   name.classList.add('name');
   username.classList.add('username');
@@ -106,11 +109,15 @@ function createUserCard(obj) {
   followers.textContent = `Followers: ${obj.followers}`;
   following.textContent = `Following: ${obj.following}`;
   bio.textContent = `Bio: ${obj.bio}`;
+  new GitHubCalendar(calendar, obj.login, {
+    responsive: true
+  });
 
   // Append elements
   profile.append(profileLink);
   cardInfo.append(name, username, location, profile, followers, following, bio);
-  card.append(img, cardInfo);
+  topContainer.append(img, cardInfo);
+  card.append(topContainer, calendar);
 
   return card;
 }
